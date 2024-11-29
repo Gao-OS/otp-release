@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-standalone-linux-arm64-otp-release:
-    runs-on: self-hosted, ubuntu-latest-arm64
+    runs-on: [self-hosted, ubuntu-latest-arm64]
     steps:
       -
         name: Checkout Repo
