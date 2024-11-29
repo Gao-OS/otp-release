@@ -51,7 +51,7 @@ jobs:
         name: Build otp
         working-directory: ./otp
         run: |
-          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --with-crypto --enable-static-nifs --enable-builtin-zlib
+          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --enable-static-nifs --enable-builtin-zlib
           export RELEASE_ROOT=${{ github.workspace }}/release/${{ github.event.inputs.otp-release-version }}-linux-amd64
           make release
           cd ${{ github.workspace }}/release
