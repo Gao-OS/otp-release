@@ -1,0 +1,66 @@
+name: Build Linux amd64 standalone otp-release
+
+on: 
+  workflow_dispatch:
+    inputs:
+      otp-release-version:
+        required: true
+        description: 'The git revison of OTP release to use'     
+        default: 'OTP-27.1.2'
+      openssl-version:
+        required: true
+        description: 'The git revison of OpenSSL to use'
+        default: "openssl-3.4.0"
+
+jobs:
+  build-standalone-linux-amd64-otp-release:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      -
+        name: Checkout otp
+        uses: actions/checkout@v4
+        with:
+          repository: erlang/otp
+          ref: ${{ github.event.inputs.otp-release-version }}
+          path: otp
+      -
+        name: Checkout openssl
+        uses: actions/checkout@v4
+        with:
+          repository: openssl/openssl
+          ref: ${{ github.event.inputs.openssl-version }}
+          path: openssl
+      -
+        name: Setup build environment
+        run: |
+          sudo apt update
+          sudo apt install -y -qq build-essential
+      -
+        name: Build openssl
+        working-directory: ./openssl
+        run: |
+          ./Configure --prefix=${{ github.workspace }}/lib/openssl
+          make
+          make install
+      -
+        name: Build otp
+        working-directory: ./otp
+        run: |
+          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl
+          export RELEASE_ROOT=${{ github.workspace }}/release/${{ github.event.inputs.otp-release-version }}-linux-amd64
+          make release
+          cd ${{ github.workspace }}/release
+          tar czf ${{ github.event.inputs.otp-release-version }}-linux-amd64.tar.gz ${{ github.event.inputs.otp-release-version }}-linux-amd64
+      -
+        name: Upload to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: release/${{ github.event.inputs.otp-release-version }}-linux-amd64.tar.gz
+          tag: ${{ github.event.inputs.otp-release-version }}
+          overwrite: true
