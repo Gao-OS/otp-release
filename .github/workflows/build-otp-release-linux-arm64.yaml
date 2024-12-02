@@ -20,11 +20,13 @@ jobs:
         name: Checkout Repo
         uses: actions/checkout@v4
         with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
           ref: main
       -
         name: Checkout otp
         uses: actions/checkout@v4
         with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
           repository: erlang/otp
           ref: ${{ github.event.inputs.otp-release-version }}
           path: otp
@@ -32,6 +34,7 @@ jobs:
         name: Checkout openssl
         uses: actions/checkout@v4
         with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
           repository: openssl/openssl
           ref: ${{ github.event.inputs.openssl-version }}
           path: openssl
