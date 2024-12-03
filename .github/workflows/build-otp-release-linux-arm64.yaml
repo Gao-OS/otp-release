@@ -42,7 +42,7 @@ jobs:
         name: Setup build environment
         run: |
           sudo apt update
-          sudo apt install -y -qq build-essential
+          sudo apt install -y -qq build-essential libncurses-dev
       -
         name: Build openssl
         working-directory: ./openssl
