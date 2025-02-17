@@ -7,7 +7,7 @@ Supplies prebuilt erlang otp release
 
 ## Custom ERTS Builds for [Burrito](https://github.com/burrito-elixir/burrito)
 
-Precompiled builds of Erlang Beam for the Burrito project.
+Precompiled builds of Erlang Runtime System Application, ERTS for the Burrito project.
 
 - `[os: :darwin, cpu: :x86_64]`
 - `[os: :darwin, cpu: :aarch64]`
