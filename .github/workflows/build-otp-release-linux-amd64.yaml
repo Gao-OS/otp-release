@@ -15,6 +15,8 @@ on:
 jobs:
   build-standalone-linux-amd64-otp-release:
     runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
     steps:
       -
         name: Checkout Repo
@@ -38,8 +40,9 @@ jobs:
       -
         name: Setup build environment
         run: |
-          sudo apt update
-          sudo apt install -y -qq build-essential
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          sudo apt-get install -y zlib1g-dev
       -
         name: Build openssl
         working-directory: ./openssl
