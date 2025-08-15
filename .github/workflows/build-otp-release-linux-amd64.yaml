@@ -46,7 +46,7 @@ jobs:
         name: Build openssl
         working-directory: ./openssl
         run: |
-          ./Configure --prefix=${{ github.workspace }}/lib/openssl
+          ./Configure --prefix=${{ github.workspace }}/lib/openssl no-shared
           make
           make install
       -
