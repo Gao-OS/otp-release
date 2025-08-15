@@ -1,0 +1,92 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-build-amd64:
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      -
+        name: Checkout Repo
+        uses: actions/checkout@v4
+      -
+        name: Checkout otp
+        uses: actions/checkout@v4
+        with:
+          repository: erlang/otp
+          ref: 'OTP-27.1.2'
+          path: otp
+      -
+        name: Checkout openssl
+        uses: actions/checkout@v4
+        with:
+          repository: openssl/openssl
+          ref: 'openssl-3.4.0'
+          path: openssl
+      -
+        name: Setup build environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses-dev
+      -
+        name: Build openssl
+        working-directory: ./openssl
+        run: |
+          ./Configure --prefix=${{ github.workspace }}/lib/openssl
+          make
+          make install
+      -
+        name: Build otp
+        working-directory: ./otp
+        run: |
+          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --enable-static-nifs --enable-builtin-zlib
+          export RELEASE_ROOT=${{ github.workspace }}/release/OTP-27.1.2-linux-amd64
+          make release
+
+  test-build-arm64:
+    runs-on: [self-hosted, Linux, ARM64, ubuntu-latest-arm64]
+    steps:
+      -
+        name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
+      -
+        name: Checkout otp
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
+          repository: erlang/otp
+          ref: 'OTP-27.1.2'
+          path: otp
+      -
+        name: Checkout openssl
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.GAO_OS_SSH_KEY }}
+          repository: openssl/openssl
+          ref: 'openssl-3.4.0'
+          path: openssl
+      -
+        name: Setup build environment
+        run: |
+          sudo apt update
+          sudo apt install -y -qq build-essential libncurses-dev
+      -
+        name: Build openssl
+        working-directory: ./openssl
+        run: |
+          ./Configure --prefix=${{ github.workspace }}/lib/openssl
+          make
+          make install
+      -
+        name: Build otp
+        working-directory: ./otp
+        run: |
+          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --enable-static-nifs --enable-builtin-zlib
+          export RELEASE_ROOT=${{ github.workspace }}/release/OTP-27.1.2-linux-arm64
+          make release
