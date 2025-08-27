@@ -39,22 +39,37 @@ jobs:
           ref: ${{ github.event.inputs.openssl-version }}
           path: openssl
       -
+        name: Checkout ncurses
+        uses: actions/checkout@v4
+        with:
+          repository: mirror/ncurses
+          ref: v6.4
+          path: ncurses
+      -
         name: Setup build environment
         run: |
           sudo apt update
-          sudo apt install -y -qq build-essential libncurses-dev
+          sudo apt install -y -qq build-essential
       -
         name: Build openssl
         working-directory: ./openssl
         run: |
-          ./Configure --prefix=${{ github.workspace }}/lib/openssl
+          ./Configure --prefix=${{ github.workspace }}/lib/openssl no-shared
+          make
+          make install
+      -
+        name: Build ncurses
+        working-directory: ./ncurses
+        run: |
+          ./configure --prefix=${{ github.workspace }}/lib/ncurses --disable-shared --enable-static
           make
           make install
       -
         name: Build otp
         working-directory: ./otp
         run: |
-          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --with-crypto --enable-static-nifs --enable-builtin-zlib
+          export LDFLAGS="-static"
+          ./configure --disable-shared --with-ssl=${{ github.workspace }}/lib/openssl --with-ncurses=${{ github.workspace }}/lib/ncurses --with-crypto --enable-static-nifs --enable-builtin-zlib
           export RELEASE_ROOT=${{ github.workspace }}/release/${{ github.event.inputs.otp-release-version }}-linux-arm64
           make release
           cd ${{ github.workspace }}/release
